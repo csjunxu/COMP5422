@@ -1,6 +1,9 @@
 %% Loading the database into matrix v
 dataset_uint8=load_database();
 
+%% Rotation compensation
+dataset_rotation=rotation_compensation(dataset_uint8);
+
 %% Initializations
 % We randomly pick an image from our database and use the rest of the
 % images for training. Training is done on 399 pictues. We later
@@ -9,9 +12,9 @@ dataset_uint8=load_database();
 % Randomly pick an index.
 randon_image_id=round(400*rand(1,1));
 % Get the image for testing
-random_image=dataset_uint8(:,randon_image_id);
+random_image=dataset_rotation(:,randon_image_id);
 % Get the rest 399 images as training dataset
-training_dataset=dataset_uint8(:,[1:randon_image_id-1 randon_image_id+1:end]);
+training_dataset=dataset_rotation(:,[1:randon_image_id-1 randon_image_id+1:end]);
 
 N=20;                               % Number of signatures used for each image.
 %% Subtracting the mean from v
@@ -28,7 +31,7 @@ V=V(:,end:-1:end-(N-1));            % Pick the eignevectors corresponding to the
 
 %% Calculating the signature for each image
 signiture=zeros(size(training_dataset,2),N);
-for i=1:size(training_dataset,2);
+for i=1:size(training_dataset,2)
     signiture(i,:)=single(training_dataset_mean_removed(:,i))'*V;    % Each row in cv is the signature for one image.
 end
 
@@ -36,6 +39,7 @@ end
 %% Recognition 
 %  Now, we run the algorithm and see if we can correctly recognize the face. 
 subplot(121); 
+%  We know that the images are 112 px by 92 px.
 imshow(reshape(random_image,112,92));title(num2str(randon_image_id),'FontWeight','bold','Fontsize',16,'color','red');
 
 subplot(122);
