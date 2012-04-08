@@ -22,5 +22,5 @@ if(isempty(loaded))
     dataset_uint8=uint8(dataset); % Convert to unsigned 8 bit numbers to save memory. 
     toc
 end
-loaded=1;  % Set 'loaded' to aviod loading the database again. 
+loaded=1;  % Set 'loaded' to avoid loading the database again. 
 out=dataset_uint8;
