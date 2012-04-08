@@ -36,5 +36,5 @@ if(isempty(rotated))
     dataset_rotated=uint8(dataset); % Convert to unsigned 8 bit numbers to save memory. 
     toc;
 end
-rotated=1;  % Set 'loaded' to aviod loading the database again. 
+rotated=1;  % Set 'rotated' to avoid rotating the images again. 
 out=dataset_rotated;
