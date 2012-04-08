@@ -2,8 +2,8 @@
 dataset_uint8=load_database();
 
 %% Rotation compensation
-% dataset_rotation=rotation_compensation(dataset_uint8);
-dataset_rotation=dataset_uint8;
+dataset_rotation=rotation_compensation(dataset_uint8);
+% dataset_rotation=dataset_uint8;
 
 %% Image enhancement
 dataset_enhanced=image_enhancement(dataset_rotation);
