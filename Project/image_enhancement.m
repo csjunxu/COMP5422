@@ -17,5 +17,5 @@ if(isempty(image_enhanced))
     dataset_enhanced=uint8(dataset); % Convert to unsigned 8 bit numbers to save memory. 
     toc;
 end
-image_enhanced=1;  % Set 'loaded' to aviod loading the database again. 
+image_enhanced=1;  % Set 'image_enhanced' to aviod applying the enhancement again. 
 out=dataset_enhanced;
