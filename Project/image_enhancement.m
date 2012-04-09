@@ -9,8 +9,9 @@ if(isempty(image_enhanced))
 
     for i=1:size(database_in,2)
         I = reshape(database_in(:,i),112,92);
-        I = adapthisteq(I);
+%         I = adapthisteq(I);
         I = imadjust(I);
+%         I = single_scale_retinex(I);
         dataset(:,i)=reshape(I,112*92,1);
     end
     
