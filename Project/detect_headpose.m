@@ -1,5 +1,5 @@
-function [Eyeangle , ConfidentLevel]=detect_headpose(GrayImage,skinlevelmin,skinlevelmax,displaystatus)
-
+%function [Eyeangle , ConfidentLevel]=detect_headpose(GrayImage,skinlevelmin,skinlevelmax,displaystatus)
+function [Eyeangle , ConfidentLevel]=detect_headpose(GrayImage,displaystatus)
 Eyeangle = 0;
 ConfidentLevel = 0;
 ImageHeight=size(GrayImage,1);
@@ -9,7 +9,37 @@ if (displaystatus == 1)
 end
 I = 255 - GrayImage ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+HS1=zeros(ImageHeight,ImageWidth);
+HS2=zeros(ImageHeight,ImageWidth);
+HS3=zeros(ImageHeight,ImageWidth);
 
+for loopy = 1:ImageHeight;
+    for loopx = 2:ImageWidth;
+        HS1(loopy,loopx) = abs(I(loopy,loopx) - I(loopy,loopx-1));
+        HS2(loopy,loopx) = 20*int8(abs(I(loopy,loopx) - I(loopy,loopx-1))/20);
+        HS3(loopy,loopx) = 50*int8(abs(I(loopy,loopx) - I(loopy,loopx-1))/50);
+    end;
+end;
+CL1=zeros(3,12);
+for loopangle = 1:12;
+    offsetyo = 0.95*ImageWidth*sin(loopangle*2*pi/12);
+    offsetxo = 0.95*ImageWidth*cos(loopangle*2*pi/12);
+    offsety = offsetyo / 6;
+    offsetx = offsetxo / 6;
+    CL1(1,loopangle) = I( int8(ImageHeight/2+offsety), int8(ImageWidth/2 + offsetx));
+    CL1(2,loopangle) = I( int8(ImageHeight/2+offsety*2), int8(ImageWidth/2 + offsetx*2));
+    CL1(3,loopangle) = I( int8(ImageHeight/2+offsety*3), int8(ImageWidth/2 + offsetx*3));
+end
+
+skinlevelmin = min( mean(CL1(1,:)), mean(CL1(2,:)) ) * 0.5;
+skinlevelmax = max( mean(CL1(1,:)), mean(CL1(2,:)) ) *1.5;
+if skinlevelmax > max(max(I))
+    skinlevelmax = max(max(I));
+end
+
+subplot(3,3,7),imshow(HS1);
+subplot(3,3,8),imshow(HS2);
+subplot(3,3,9),imshow(HS3);
 %%%%%%%%%%%%%%%%%%%%%%% EXTRACT SKIN %%%%%%%%%%%%%%%%%%%%%%
 S=zeros(ImageHeight,ImageWidth);
 [SkinIndexRow,SkinIndexCol] =find(skinlevelmin<I & I<skinlevelmax);
@@ -41,7 +71,7 @@ ISN = ~SN;
 CC=bwconncomp(ISN,4);
 S = regionprops(CC,'Area');
 L = labelmatrix(CC);
-Eyemin = round(ImageWidth/25 * ImageHeight/30);
+Eyemin = round(ImageWidth/25 * ImageHeight/30 /2);
 Eyemax = round(ImageWidth/8 *ImageHeight/15);
 
 TopArea = ceil(ImageHeight/5);
@@ -86,17 +116,23 @@ end
 %%%%%%%%%%%%%%% FIND Componenet Orientation %%%%%%%%%%%%%%%%%
 
 L = bwlabel(FaceComponent,8); %% SN
-EyeOrientation  = regionprops(L,'Orientation');
-AscOrder = sort( [EyeOrientation.Orientation]);
+KK = zeros(ImageHeight,ImageWidth);
+EyeOrientation  = regionprops(L,KK,{'Orientation','PixelValues','BoundingBox'});
+imshow(KK);
+%AscOrder = sort( [EyeOrientation.Orientation]);
 Eyeresult = 0;
-if (size(AscOrder,2) > 0)
-    Eyeangle = AscOrder(ceil(size(AscOrder,2)/2));
-    precision = 3;
-    titlestring = ['Eye angle is (',  num2str(Eyeangle,precision),')'];
-    Eyeresult = 1;
-else
-    Eyeangle = 0;
+ Eyeangle = 0;
     titlestring = 'Unable to detect feature component';
+if (size([EyeOrientation.Orientation],2) == 2)
+%if (size(AscOrder,2) == 2)
+    %Eyeangle = AscOrder(ceil(size(AscOrder,2)/2));
+    Eyeangle = atand(( EyeOrientation(1).BoundingBox(2) - EyeOrientation(2).BoundingBox(2) ) / (EyeOrientation(1).BoundingBox(1) - EyeOrientation(2).BoundingBox(1)));
+    precision = 3;
+    EyePositionLevel = EyeOrientation(1).BoundingBox(2) + EyeOrientation(2).BoundingBox(2)  - ImageHeight;
+    if (EyePositionLevel < 0)
+        titlestring = ['Eye angle is (',  num2str(Eyeangle,precision),')'];
+        Eyeresult = 1;
+    end
 end
 
 rgb=label2rgb(L);
@@ -105,7 +141,7 @@ if (displaystatus == 1)
 end
 TransformedImage = imrotate(GrayImage,-1*Eyeangle,'bilinear','crop');
 if (displaystatus == 1)
-    subplot(3,3,7),imshow(TransformedImage);title('Transformed Image');
+    subplot(3,3,7),imshow(TransformedImage);title('Transformed Image'); 
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (Eyeresult > 0)
