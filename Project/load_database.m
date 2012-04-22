@@ -12,9 +12,13 @@ if(isempty(loaded))
     dataset=zeros(10304,400);
     for person_id=1:40
         cd(strcat('att_faces/s',num2str(person_id)));
+        %%figure(person_id);
         for sample_id=1:10
             I=imread(strcat(num2str(sample_id),'.pgm'));
             dataset(:,(person_id-1)*10+sample_id)=reshape(I,size(I,1)*size(I,2),1);
+            %%subplot(1,10,sample_id);
+            %%imshow(I);
+            
         end
         cd ..
         cd ..

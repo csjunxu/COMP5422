@@ -1,12 +1,13 @@
 %% Loading the database into matrix v
-dataset_uint8=load_database();
+dataset_uint8=load_database(); 
 
 %% Rotation compensation
-dataset_rotation=rotation_compensation(dataset_uint8);
-% dataset_rotation=dataset_uint8;
+% dataset_rotation=rotation_compensation(dataset_uint8);
+ dataset_rotation=dataset_uint8;
 
 %% Image enhancement
-dataset_enhanced=image_enhancement(dataset_rotation);
+% dataset_enhanced=image_enhancement(dataset_rotation);
+ dataset_enhanced=dataset_rotation;
 
 %% Initializations
 % We randomly pick an image from our database and use the rest of the
@@ -14,7 +15,7 @@ dataset_enhanced=image_enhancement(dataset_rotation);
 % use the randomly selectted picture to test the algorithm.
 
 % Randomly pick an index.
-randon_image_id=round(400*rand(1,1));
+randon_image_id = 346;
 % Get the image for testing
 random_image=dataset_enhanced(:,randon_image_id);
 % Get the rest 399 images as training dataset
